@@ -3,7 +3,7 @@
   "description": "HumHub profiler module",
   "type": "library",
   "require": {
-    "phpunit/php-timer": "^1.0.9"
+    "phpunit/php-timer": "^5.0"
   },
   "config": {
     "process-timeout": 1800,

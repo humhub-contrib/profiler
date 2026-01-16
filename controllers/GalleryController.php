@@ -5,7 +5,9 @@ namespace humhub\modules\profiler\controllers;
 use humhub\modules\gallery\models\StreamGallery;
 use humhub\modules\space\models\Space;
 use humhub\modules\user\models\User;
-use PHP_Timer;
+use SebastianBergmann\Timer\Duration;
+use SebastianBergmann\Timer\ResourceUsageFormatter;
+use SebastianBergmann\Timer\Timer;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\Console;
@@ -38,8 +40,8 @@ class GalleryController extends Controller
         Yii::$app->user->switchIdentity(User::findOne(['id' => 1]));
         $gallery = StreamGallery::findForContainer(Space::findOne(['id' => 1]), true);
 
-
-        PHP_Timer::start();
+        $timer = new Timer();
+        $timer->start();
 
         for ($i = 0; $i < $this->count;$i++) {
             //$gallery->fileListQuery()->one();
@@ -47,24 +49,25 @@ class GalleryController extends Controller
             // $this->stdout($query->createCommand()->rawSql,  Console::FG_GREEN);
         }
 
-        $timeTotal = PHP_Timer::stop();
+        $duration = $timer->stop();
+        $timeTotal = $duration->asSeconds();
 
         $timeAvg = $timeTotal / $this->count;
 
         $this->printResultRow('getPreviewImageUrl(' . $this->count . ')', $timeTotal);
         $this->printResultRow('getPreviewImageUrl(avg)', $timeAvg);
         $this->stdout("\n");
-        $this->printResourceUsage();
+        $this->printResourceUsage($duration);
         //$this->stdout(sprintf("%s", "\x07"));
     }
 
-    protected function printResourceUsage()
+    protected function printResourceUsage(Duration $duration)
     {
         $load = sys_getloadavg();
         $this->printResultRow('load (1m)', $load[0]);
         $this->printResultRow('load (5m)', $load[1]);
         $this->printResultRow('load (15m)', $load[2]);
-        $this->stdout(PHP_Timer::resourceUsage() . "\n", Console::FG_GREEN);
+        $this->stdout((new ResourceUsageFormatter())->resourceUsage($duration) . "\n", Console::FG_GREEN);
 
     }
 

@@ -4,7 +4,9 @@ namespace humhub\modules\profiler\controllers;
 
 use humhub\modules\profiler\models\ProfilerResult;
 use humhub\modules\user\models\User;
-use PHP_Timer;
+use SebastianBergmann\Timer\Duration;
+use SebastianBergmann\Timer\ResourceUsageFormatter;
+use SebastianBergmann\Timer\Timer;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\Console;
@@ -16,6 +18,8 @@ abstract class ProfileController extends Controller
     public $title;
 
     public $userId = 1;
+
+    public ?Timer $timer = null;
 
     public function init()
     {
@@ -65,19 +69,20 @@ abstract class ProfileController extends Controller
             call_user_func($profiler, $result, $i);
         }
 
-        $result->timeTotal = $this->endProfiling();
+        $result->timeTotal = $this->endProfiling()?->asSeconds();
 
         return $result;
     }
 
     public function startProfiling()
     {
-        PHP_Timer::start();
+        $this->timer = new Timer();
+        $this->timer->start();
     }
 
-    public function endProfiling()
+    public function endProfiling(): ?Duration
     {
-        return PHP_Timer::stop();
+        return $this->timer ? $this->timer->stop() : null;
     }
 
     public function printResult(ProfilerResult $result, ProfilerResult $competing = null)
@@ -142,8 +147,9 @@ abstract class ProfileController extends Controller
         $this->printResultRow('load % (1m)', $load[0] * 100, false);
         $this->printResultRow('load % (5m)', $load[1] * 100, false);
         $this->printResultRow('load % (15m)', $load[2] * 100, false);
-        $this->stdout(PHP_Timer::resourceUsage() . "\n", Console::FG_GREEN);
-
+        if ($this->timer !== null) {
+            $this->stdout((new ResourceUsageFormatter())->resourceUsage($this->timer->stop()) . "\n", Console::FG_GREEN);
+        }
     }
 
     protected function printResultHeadline()
