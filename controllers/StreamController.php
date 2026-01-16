@@ -6,7 +6,7 @@ use humhub\modules\content\models\Content;
 use humhub\modules\space\models\Space;
 use humhub\modules\stream\models\ContentContainerStreamQuery;
 use humhub\modules\user\models\User;
-use PHP_Timer;
+use SebastianBergmann\Timer\Timer;
 use Yii;
 use yii\console\Controller;
 use yii\helpers\Console;
@@ -34,8 +34,8 @@ class StreamController extends Controller
 
         $contentCount = Content::find()->where(['contentcontainer_id' => $space->contentcontainer_id])->count();
 
-        PHP_Timer::start();
-
+        $timer = new Timer();
+        $timer->start();
 
         for ($i = 0; $i < $this->count;$i++) {
             //$gallery->fileListQuery()->one();
@@ -45,7 +45,7 @@ class StreamController extends Controller
             // $this->stdout($query->createCommand()->rawSql,  Console::FG_GREEN);
         }
 
-        $timeTotal = PHP_Timer::stop();
+        $timeTotal = $timer->stop()->asSeconds();
 
         $timeAvg = $timeTotal / $this->count;
 
