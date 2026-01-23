@@ -22,12 +22,12 @@ class DashboardStreamController extends ProfileController
 
     public function actionRunGuest()
     {
-        $result = $this->runProfiler(function (ProfilerResult $result) {
+        $result = $this->runProfiler(function (ProfilerResult $result): void {
             $query = new DashboardStreamQuery(['activity' => (bool) $this->activity]);
             $result->setResult($query->all());
         }, $this->title);
 
-        $competing = $this->runProfiler(function (ProfilerResult $result) {
+        $competing = $this->runProfiler(function (ProfilerResult $result): void {
             $query = new DeprecatedDashboardStreamQuery(['activity' => (bool) $this->activity]);
             $result->setResult($query->all());
         }, $this->title);
@@ -41,12 +41,12 @@ class DashboardStreamController extends ProfileController
     {
         $user = $this->getUser();
 
-        $result = $this->runProfiler(function (ProfilerResult $result) use ($user) {
+        $result = $this->runProfiler(function (ProfilerResult $result) use ($user): void {
             $query = new DashboardStreamQuery(['activity' => (bool) $this->activity, 'user' => $user]);
             $result->setResult($query->all());
         }, $this->title);
 
-        $competing = $this->runProfiler(function (ProfilerResult $result) use ($user) {
+        $competing = $this->runProfiler(function (ProfilerResult $result) use ($user): void {
             $query = new DeprecatedDashboardStreamQuery(['activity' => (bool) $this->activity, 'user' => $user]);
             $result->setResult($query->all());
         }, $this->title);
@@ -67,7 +67,7 @@ class DashboardStreamController extends ProfileController
              $result->setResult($query->all());
          }, $this->title);*/
 
-        $competing = $this->runProfiler(function (ProfilerResult $result) use ($user) {
+        $competing = $this->runProfiler(function (ProfilerResult $result) use ($user): void {
             $query = new DeprecatedDashboardStreamQuery(['activity' => (bool) $this->activity, 'user' => $user]);
             $result->setResult($query->all());
         }, $this->title);
